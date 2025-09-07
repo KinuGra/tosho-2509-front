@@ -1,5 +1,8 @@
 # 環境構築
 
+- Next.js
+- フロントリポジトリ
+
 ## 初期環境構築
 ```
 npx create-next-app@latest
