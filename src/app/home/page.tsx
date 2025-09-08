@@ -4,20 +4,49 @@ import Link from 'next/link';
 
 // ダミーデータ
 const themes = [
-  { id: 1, title: '自分のコードをpushしよう！', difficulty: 'Easy', tags: ['branch', 'basic'], pass: '/theme/1' },
-  { id: 2, title: 'コンフリクトを解決しよう！', difficulty: 'Easy', tags: ['conflict'], pass: '/theme/2' },
-  { id: 3, title: 'チーム開発をシミュレーションしてみよう１', difficulty: 'Medium', tags: ['ToDo-Application','simulation', 'advanced'], pass: '/theme/3' },
-  { id: 4, title: 'チーム開発をシミュレーションしてみよう２', difficulty: 'Hard', tags: ['Project LINKS', 'interactive'], pass: '/theme/4' },
+  { id: 1, title: '自分のコードをpushしよう！', difficulty: 'Easy', tags: ['branch', 'basic'], pass: '/theme/1', is_completed: true },
+  { id: 2, title: 'コンフリクトを解決しよう！', difficulty: 'Easy', tags: ['conflict'], pass: '/theme/2', is_completed: true },
+  { id: 3, title: 'チーム開発をシミュレーションしてみよう１', difficulty: 'Medium', tags: ['ToDo-Application','simulation', 'advanced'], pass: '/theme/3', is_completed: false },
+  { id: 4, title: 'チーム開発をシミュレーションしてみよう２', difficulty: 'Hard', tags: ['Project LINKS', 'interactive'], pass: '/theme/4', is_completed: false },
 ];
 
 // ステータス表示コンポーネント
 const Status = () => {
+  // ダミーデータ
+  const clearCount = 5;
+  const totalClears = 10;
+  const clearPercentage = (clearCount / totalClears) * 100;
+
+  const experience = 1250;
+  const nextLevelExp = 2000;
+  const expPercentage = (experience / nextLevelExp) * 100;
+
+  const progress = 50; // パーセンテージ
+
   return (
     <div className="mb-8 p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-      <h2 className="text-xl font-bold mb-2">進捗状況</h2>
-      <p>完了したお題: 3 / 10</p>
-      <div className="w-full bg-gray-300 rounded-full h-4 mt-2 dark:bg-gray-700">
-        <div className="bg-blue-500 h-4 rounded-full" style={{ width: '30%' }}></div>
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">クリア数</p>
+          <p className="text-2xl font-bold">{clearCount}</p>
+          <div className="w-full bg-gray-300 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${clearPercentage}%` }}></div>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">経験値</p>
+          <p className="text-2xl font-bold">{experience.toLocaleString()}</p>
+          <div className="w-full bg-gray-300 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+            <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${expPercentage}%` }}></div>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">進捗</p>
+          <p className="text-2xl font-bold">{progress}%</p>
+          <div className="w-full bg-gray-300 rounded-full h-2.5 mt-2 dark:bg-gray-700">
+            <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -31,10 +60,22 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
     Hard: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300',
   };
 
+  // is_completedに応じてスタイルを変更
+  const cardStyle = theme.is_completed
+    ? "bg-gray-50 dark:bg-gray-800 opacity-75"
+    : "hover:shadow-lg transition-shadow";
+
   return (
-    <div className="border rounded-lg p-4 hover:shadow-lg transition-shadow dark:border-gray-700 flex justify-between items-center">
+    <div className={`border rounded-lg p-4 dark:border-gray-700 flex justify-between items-center ${cardStyle}`}>
       <div>
-        <h3 className="text-lg font-bold mb-2">{theme.title}</h3>
+        <div className="flex items-center mb-2">
+          <h3 className="text-lg font-bold">{theme.title}</h3>
+          {theme.is_completed && (
+            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+              ✓ 完了
+            </span>
+          )}
+        </div>
         <div className="flex items-center mb-2">
           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${difficultyColor[theme.difficulty]}`}>
             {theme.difficulty}
@@ -48,8 +89,12 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
           ))}
         </div>
       </div>
-      <Link href={theme.pass} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4">
-        進む
+      <Link href={theme.pass} className={`font-bold py-2 px-4 rounded ml-4 ${
+        theme.is_completed
+          ? 'bg-gray-500 hover:bg-gray-600 text-white'
+          : 'bg-blue-500 hover:bg-blue-700 text-white'
+      }`}>
+        {theme.is_completed ? '開始' : '進む'}
       </Link>
     </div>
   );
@@ -65,7 +110,7 @@ export default function HomePage() {
 
         <section>
           <h2 className="text-2xl font-bold mb-4">お題カード一覧</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {themes.map(theme => (
               <ThemeCard key={theme.id} theme={theme} />
             ))}
