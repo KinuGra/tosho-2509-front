@@ -5,7 +5,7 @@ export default function Page() {
   return (
     <>
       ログイン画面
-      < TwoFactor />
+      <TwoFactor />
     </>
-  );
+  )
 }
