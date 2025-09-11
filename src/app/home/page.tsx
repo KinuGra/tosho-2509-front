@@ -62,7 +62,7 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
 
   // is_completedに応じてスタイルを変更
   const cardStyle = theme.is_completed
-    ? "bg-gray-50 dark:bg-gray-800 opacity-75"
+    ? "bg-gray-100 dark:bg-gray-800"
     : "hover:shadow-lg transition-shadow";
 
   return (
@@ -71,7 +71,7 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
         <div className="flex items-center mb-2">
           <h3 className="text-lg font-bold">{theme.title}</h3>
           {theme.is_completed && (
-            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+            <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-base font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
               ✓ 完了
             </span>
           )}
@@ -94,7 +94,7 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
           ? 'bg-gray-500 hover:bg-gray-600 text-white'
           : 'bg-blue-500 hover:bg-blue-700 text-white'
       }`}>
-        {theme.is_completed ? '開始' : '進む'}
+        {theme.is_completed ? '復習' : '開始'}
       </Link>
     </div>
   );
