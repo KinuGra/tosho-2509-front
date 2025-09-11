@@ -34,6 +34,7 @@ export default function LoginPage() {
         }
 
         try {
+            console.log("[Frontend] Attempting login for email:", email);
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: {
@@ -41,13 +42,19 @@ export default function LoginPage() {
                 },
                 body: JSON.stringify({ email, password }),
             });
+            console.log("[Frontend] Login response status:", res.status);
             const data = await res.json();
+            console.log("[Frontend] Login response data:", data);
+            
             if (res.ok) {
-                router.push("twofa");
+                console.log("[Frontend] Login successful, redirecting to 2FA");
+                router.push(`/twofa?email=${encodeURIComponent(email)}`);
             } else {
+                console.error("[Frontend] Login failed:", data);
                 setMsg(data.detail || "ログインに失敗しました。メールアドレスまたはパスワードが正しくありません。");
             }
         } catch (error) {
+            console.error("[Frontend] Login error:", error);
             setMsg("サーバーとの通信に失敗しました。");
         }
     };

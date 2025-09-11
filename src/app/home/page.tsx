@@ -1,21 +1,10 @@
-// サーバーコンポーネントで /api/me を叩く
-async function getMe() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE ?? ""}/api/me`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-}
+import UserInfo from './components/UserInfo';
 
-export default async function HomePage() {
-    const me = await getMe();
+export default function HomePage() {
     return (
         <main className="max-w-2xl mx-auto p-6 space-y-4">
             <h1 className="text-2xl font-bold">gitsim ホーム</h1>
-            {me ? (
-                <div className="border p-4 rounded">
-                    <div>ユーザー: {me.email}</div>
-                    <div>レベル: <b>{me.level}</b> / 経験値: <b>{me.exp}</b></div>
-                </div>
-            ) : <div className="text-red-600">ユーザー情報の取得に失敗</div>}
+            <UserInfo />
 
             <div className="grid grid-cols-2 gap-4">
                 <a className="border p-4 rounded hover:bg-gray-50" href="/simulation">シミュレーションへ</a>
