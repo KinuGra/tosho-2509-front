@@ -1,4 +1,4 @@
-export function terminalcommand(command: string, log: string){
+export function terminalcommand(command: string, topicNumber: number, stepNumber: Number){
   let splitedCommand = command.split(" ");
   if(splitedCommand[0] === "git"){
     switch(splitedCommand[1]){

@@ -4,3 +4,5 @@
 https://qiita.com/fukumone/items/73e1a9a62c5e4454263b
 
 上記参考にgit commandを作成しています
+
+正規表現を使う
