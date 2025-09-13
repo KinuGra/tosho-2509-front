@@ -1,4 +1,4 @@
-export function terminalcommand(command: string, topicNumber: number, stepNumber: Number): string {
+export function terminalcommand(command: string, commandLine: string[], topicNumber: number, stepNumber: Number): string {
   const gitMatch = command.match(/^git\s+(\w+)(.*)$/);
   if (!gitMatch) return "This command is not supported this application\nPlease use \"git\" command";
   
@@ -7,10 +7,15 @@ export function terminalcommand(command: string, topicNumber: number, stepNumber
   const msgMatch = rest.match(/-m\s+["']?([^"'\n]+)["']?/);
   const args = rest.replace(/-[a-zA-Z0-9-]*(?:\s+["']?[^"'\n]*["']?)?/g, '').trim();
   
+  const hasAddCommand = Array.isArray(commandLine) && commandLine.some(cmd => cmd.match(/^git\s+add/));
+  
   switch (cmd) {
     case "add":
       return opts.has('A') ? "Added all files including untracked" : "Added files";
     case "commit":
+      if (!opts.has('a') && !hasAddCommand) {
+        return "nothing to commit (use \"git add\" to track files)";
+      }
       let result = opts.has('a') ? "Committed all changes" : "Committed";
       return msgMatch ? `${result} with message "${msgMatch[1]}"` : `${result} without message`;
     case "push":
