@@ -1,4 +1,5 @@
-import { terminalcommand } from "../../components/simulation/terminlacommand/terminalcommand";
+import { terminalcommand } from "@/features/terminalcommand";
+
 
 export default function TestPage() {
   const tests: string[] = [

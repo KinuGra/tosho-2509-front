@@ -30,7 +30,7 @@ export default function SimulationPage() {
 
         const next = steps[nextIdx];
 
-        // step1: エディタ編集していればOK（雑に title を含む変更かで判定）
+        // step1: エディタ編集していればOK
         if (next.id === 1) {
             if (editor.includes("style=") || editor.includes("text-") || editor.includes("color")) {
                 await complete(next.id);
@@ -77,17 +77,15 @@ export default function SimulationPage() {
                 ))}
             </ol>
 
-            <div className="grid md:grid-cols-2 gap-4">
-                <div className="border rounded p-2">
-                    <div className="font-semibold mb-2">エディタ</div>
-                    <textarea className="w-full h-48 border p-2" value={editor} onChange={e => setEditor(e.target.value)} />
-                </div>
-                <div className="border rounded p-2">
-                    <div className="font-semibold mb-2">ターミナル</div>
-                    <input className="w-full border p-2" placeholder="git add / git commit -m ... / git push"
-                        value={term} onChange={e => setTerm(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitCommand()} />
-                    <button className="mt-2 bg-black text-white px-3 py-1 rounded" onClick={submitCommand}>実行</button>
-                </div>
+            <div className="border rounded p-2">
+                <div className="font-semibold mb-2">エディタ</div>
+                <textarea className="w-full h-48 border p-2" value={editor} onChange={e => setEditor(e.target.value)} />
+            </div>
+            <div className="border rounded p-2">
+                <div className="font-semibold mb-2">ターミナル</div>
+                <input className="w-full border p-2" placeholder="git add / git commit -m ... / git push"
+                    value={term} onChange={e => setTerm(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitCommand()} />
+                <button className="mt-2 bg-black text-white px-3 py-1 rounded" onClick={submitCommand}>実行</button>
             </div>
 
             <p className="text-sm text-gray-700">{msg}</p>
