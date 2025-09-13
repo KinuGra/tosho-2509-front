@@ -4,6 +4,7 @@ interface StepProgress {
   topicId: number;
   stepId: number;
   lastUpdated: string;
+  wantcode: string[];
 }
 
 export function updateStepProgress(is_complete: boolean): void {
@@ -12,7 +13,13 @@ export function updateStepProgress(is_complete: boolean): void {
   let currentProgress: StepProgress;
 
   if (!storedProgress) {
-    currentProgress = { topicId: 1, stepId: 1, lastUpdated: new Date().toISOString() };
+    const currentStep = exampleTopic.steps.find(step => step.order === 1);
+    currentProgress = { 
+      topicId: 1, 
+      stepId: 1, 
+      lastUpdated: new Date().toISOString(),
+      wantcode: currentStep?.wantcode || []
+    };
   } else {
     currentProgress = JSON.parse(storedProgress);
   }
@@ -22,16 +29,17 @@ export function updateStepProgress(is_complete: boolean): void {
     currentProgress.stepId++;
     
     if (exampleTopic.id === currentProgress.topicId && currentProgress.stepId > exampleTopic.steps.length) {
-      currentProgress.topicId++;
       currentProgress.stepId = 1;
     }
   }
 
   // ステップ 3: ローカルストレージに保存
+  const currentStep = exampleTopic.steps.find(step => step.order === currentProgress.stepId);
   const updatedProgress: StepProgress = {
     topicId: currentProgress.topicId,
     stepId: currentProgress.stepId,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
+    wantcode: currentStep?.wantcode || []
   };
 
   localStorage.setItem('stepProgress', JSON.stringify(updatedProgress));

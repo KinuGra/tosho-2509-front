@@ -41,6 +41,8 @@ stepId: 更新後のstepId
 
 lastUpdated: 現在の日付と時刻 (例: new Date().toISOString())
 
+wantcode: 現在のステップの正解コード配列 (topix.tsから取得)
+
 このオブジェクトをJSON文字列に変換します。
 
 localStorageのキー'stepProgress'に、JSON文字列として保存します。

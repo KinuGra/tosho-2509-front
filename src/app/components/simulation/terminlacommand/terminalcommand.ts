@@ -1,4 +1,25 @@
+import { updateStepProgress } from '../stepmanagement/stepmanagement';
+
 export function terminalcommand(command: string, commandLine: string[], topicNumber: number, stepNumber: Number): string {
+  // wantcodeの判定
+  const storedProgress = localStorage.getItem('stepProgress');
+  if (storedProgress) {
+    const progress = JSON.parse(storedProgress);
+    const wantcode = progress.wantcode || [];
+    
+    // commandLineがwantcodeの順番通りに含まれているかチェック
+    let wantcodeIndex = 0;
+    for (const cmd of commandLine) {
+      if (wantcodeIndex < wantcode.length && cmd === wantcode[wantcodeIndex]) {
+        wantcodeIndex++;
+      }
+    }
+    
+    // 全てのwantcodeが順番通りに含まれている場合
+    if (wantcodeIndex === wantcode.length && wantcode.length > 0) {
+      updateStepProgress(true);
+    }
+  }
   const gitMatch = command.match(/^git\s+(\w+)(.*)$/);
   if (!gitMatch) return "This command is not supported this application\nPlease use \"git\" command";
   
