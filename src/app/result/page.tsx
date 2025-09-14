@@ -26,17 +26,11 @@ export default function ResultPage() {
           <p className="text-gray-600">お題をクリアしました</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">獲得報酬</h2>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">経験値</span>
-              <span className="text-green-600 font-bold">+100 EXP</span>
-            </div>
-          </div>
-
-          <div className="text-gray-700 bg-gray-50 rounded-lg p-4">
-            実装予定？
+        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">獲得報酬</h2>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">経験値</span>
+            <span className="text-green-600 font-bold">+100 EXP</span>
           </div>
         </div>
 
