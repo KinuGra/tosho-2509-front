@@ -66,7 +66,8 @@ export default function Playground() {
           console.log('Step completed!', { cmd, wantcode: currentStep.wantcode, history: newHistory });
           setTerminalLines((prev) => [...prev, "\n✓ ステップ完了! 次のステップに進みます..."]);
           setTimeout(handleStepComplete, 1500);
-        }
+        },
+        currentStep.responses
       );
 
       if (cmd.toLowerCase() === "clear" || output === "CLEAR") {

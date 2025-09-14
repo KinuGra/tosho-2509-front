@@ -2,7 +2,8 @@ export function terminalcommand(
   command: string, 
   commandLine: string[], 
   wantcode: string[], 
-  onStepComplete?: () => void
+  onStepComplete?: () => void,
+  stepResponses?: { [command: string]: string }
 ): string {
   // コマンドパターンマッチング関数
   const matchesPattern = (cmd: string, pattern: string): boolean => {
@@ -30,6 +31,11 @@ export function terminalcommand(
   // EDITOR_CHANGEの場合は空白コマンドでもOK
   if (command.trim() === '' && wantcode.includes('EDITOR_CHANGE')) {
     return "Editor change detected";
+  }
+  
+  // ステップ固有のレスポンスをチェック
+  if (stepResponses && stepResponses[command.trim()]) {
+    return stepResponses[command.trim()];
   }
   
   const gitMatch = command.match(/^git\s+(\w+)(.*)$/);

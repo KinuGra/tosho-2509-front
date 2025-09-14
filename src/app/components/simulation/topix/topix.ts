@@ -16,6 +16,7 @@ export interface Step {
     description: string;
     wantcode: string[];
     outcode: string;
+    responses?: { [command: string]: string };
 }
 
 // お題一覧
@@ -35,14 +36,19 @@ export const topics: Topic[] = [
             wantcode: [
                 "git checkout -b"
             ],
-            outcode: "git checkout -b [ブランチ名]\n// 新しいブランチを作成して切り替えます"
+            outcode: "git checkout -b [ブランチ名]\n// 新しいブランチを作成して切り替えます",
+            responses: {
+                "git status": "On branch feature/new-feature\nnothing to commit, working tree clean",
+                "git branch": "  main\n* feature/new-feature"
+            }
         },
         {
             order: 2,
-            title: "コードを編集・追加する",
+            title: "コードを編集・追加してaddする",
             description: "必要なコードの編集や追加を行います。",
             wantcode: [
-                "EDITOR_CHANGE"
+                "EDITOR_CHANGE",
+                "git add"
             ],
             outcode: "// 新機能の実装\nfunction newFeature() {\n    console.log('新しい機能を追加しました');\n    return true;\n}\n\n// 既存コードの修正\nconst config = {\n    version: '1.1.0',\n    updated: new Date()\n};"
         },
