@@ -84,12 +84,18 @@ const ThemeCard = ({ theme }: { theme: Topic }) => {
           ))}
         </div>
       </div>
-      <Link href={`/simulation?topicId=${theme.id}`} className={`font-bold py-2 px-4 rounded ml-4 ${theme.is_completed
+      {theme.is_wip ? (
+        <span className="font-bold py-2 px-4 rounded ml-4 bg-gray-300 text-gray-500 cursor-not-allowed">
+          準備中
+        </span>
+      ) : (
+        <Link href={`/simulation?topicId=${theme.id}`} className={`font-bold py-2 px-4 rounded ml-4 ${theme.is_completed
           ? 'bg-gray-500 hover:bg-gray-600 text-white'
           : 'bg-blue-500 hover:bg-blue-700 text-white'
         }`}>
-        {theme.is_completed ? '復習' : '開始'}
-      </Link>
+          {theme.is_completed ? '復習' : '開始'}
+        </Link>
+      )}
     </div>
   );
 };

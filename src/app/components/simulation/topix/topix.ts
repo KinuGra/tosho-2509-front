@@ -7,6 +7,7 @@ export interface Topic {
     difficulty: string;
     tags: string[];
     is_completed?: boolean; // オプショナルにして、未設定の場合はfalseとして扱う
+    is_wip?: boolean; // 準備中かどうかを示すフラグ
 }
 
 // ステップ型
@@ -76,8 +77,9 @@ export const topics: Topic[] = [
     title: "コンフリクトを解決しよう！",
     description: "Gitでコンフリクトが発生した際の解決方法を学びます。",
     difficulty: "Medium",
-    tags: ["conflict", "merge"],
+    tags: ["conflict", "merge", "準備中"],
     is_completed: false,
+    is_wip: true,
     steps: [
         {
             order: 1,
@@ -163,6 +165,58 @@ export const topics: Topic[] = [
                 "git stash pop"
             ],
             outcode: "git stash pop\n// 一時保存した変更を復元します"
+        }
+    ],
+},
+{
+    id: 4,
+    title: "Git-flowで開発しよう！",
+    description: "Git-flowのブランチ戦略に基づいて、機能開発からリリースまでの流れを学びます。",
+    difficulty: "Medium",
+    tags: ["git-flow", "branch-strategy", "release", "準備中"],
+    is_completed: false,
+    is_wip: true,
+    steps: [
+        {
+            order: 1,
+            title: "feature ブランチの作成",
+            description: "Git-flowに従って、feature/ブランチを作成します。",
+            wantcode: [
+                "git flow feature start",
+                "git checkout -b feature/"
+            ],
+            outcode: "git flow feature start my-feature\n// または\ngit checkout -b feature/my-feature\n// 新しい機能用のブランチを作成"
+        },
+        {
+            order: 2,
+            title: "develop ブランチへのマージ",
+            description: "完成した機能をdevelopブランチにマージします。",
+            wantcode: [
+                "git checkout develop",
+                "git merge feature/"
+            ],
+            outcode: "git checkout develop\ngit merge feature/my-feature\n// 機能をdevelopブランチに統合"
+        },
+        {
+            order: 3,
+            title: "release ブランチの作成",
+            description: "リリース用のブランチを作成してバージョン管理を行います。",
+            wantcode: [
+                "git flow release start",
+                "git checkout -b release/"
+            ],
+            outcode: "git flow release start v1.0.0\n// または\ngit checkout -b release/v1.0.0\n// リリース準備用のブランチを作成"
+        },
+        {
+            order: 4,
+            title: "main ブランチへのマージとタグ付け",
+            description: "リリースをmainブランチにマージしてタグを付けます。",
+            wantcode: [
+                "git checkout main",
+                "git merge release/",
+                "git tag"
+            ],
+            outcode: "git checkout main\ngit merge release/v1.0.0\ngit tag -a v1.0.0 -m \"Version 1.0.0 release\"\n// リリースを本番環境用のブランチにマージしてタグ付け"
         }
     ],
 }
