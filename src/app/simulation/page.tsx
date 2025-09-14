@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Editor from "@monaco-editor/react";
-import { terminalcommand } from "../components/simulation/terminlacommand/terminalcommand";
+import { terminalcommand } from "../../features/terminalcommand";
 import { exampleTopic, Topic, Step, getTopicById } from "../components/simulation/topix/topix";
 
 export default function Playground() {
