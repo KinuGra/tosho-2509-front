@@ -1,9 +1,72 @@
+"use client"
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+
 export default function ResultPage() {
-    return (
-        <main className="max-w-xl mx-auto p-6 space-y-3">
-            <h1 className="text-2xl font-bold">リザルト</h1>
-            <p>今回の学び：HTML編集 / git add / git commit / git push</p>
-            <a className="underline" href="/home">ホームへ戻る</a>
-        </main>
-    );
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+
+  useEffect(() => {
+    const history = sessionStorage.getItem('commandHistory');
+    if (history) {
+      setCommandHistory(JSON.parse(history));
+    }
+  }, []);
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
+        <div className="text-center mb-6">
+          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-white text-3xl">✓</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">お疲れ様でした！</h1>
+          <p className="text-gray-600">お題をクリアしました</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">獲得報酬</h2>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">経験値</span>
+              <span className="text-green-600 font-bold">+100 EXP</span>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">実行コマンド数</h2>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">コマンド</span>
+              <span className="text-blue-600 font-bold">{commandHistory.length}個</span>
+            </div>
+          </div>
+        </div>
+
+        {commandHistory.length > 0 && (
+          <div className="bg-black text-green-400 font-mono p-4 rounded-lg mb-6 max-h-40 overflow-y-auto">
+            <h3 className="text-white mb-2">実行したコマンツ履歴:</h3>
+            {commandHistory.map((cmd, index) => (
+              <div key={index} className="mb-1">
+                <span className="text-gray-400">{index + 1}.</span> {cmd}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <Link 
+            href="/home" 
+            className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition-colors text-center"
+          >
+            ホームに戻る
+          </Link>
+          <Link 
+            href="/simulation" 
+            className="block w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded transition-colors text-center"
+          >
+            もう一度挑戦
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }

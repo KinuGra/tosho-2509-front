@@ -1,25 +1,37 @@
-import { updateStepProgress } from '../stepmanagement/stepmanagement';
-
-export function terminalcommand(command: string, commandLine: string[], topicNumber: number, stepNumber: Number): string {
-  // wantcodeの判定
-  const storedProgress = localStorage.getItem('stepProgress');
-  if (storedProgress) {
-    const progress = JSON.parse(storedProgress);
-    const wantcode = progress.wantcode || [];
+export function terminalcommand(
+  command: string, 
+  commandLine: string[], 
+  wantcode: string[], 
+  onStepComplete?: () => void
+): string {
+  // コマンドパターンマッチング関数
+  const matchesPattern = (cmd: string, pattern: string): boolean => {
+    const cmdTrim = cmd.trim();
+    const patternTrim = pattern.trim();
     
-    // commandLineがwantcodeの順番通りに含まれているかチェック
-    let wantcodeIndex = 0;
-    for (const cmd of commandLine) {
-      if (wantcodeIndex < wantcode.length && cmd === wantcode[wantcodeIndex]) {
-        wantcodeIndex++;
-      }
+    // 特殊パターン: EDITOR_CHANGE - 空白コマンドでクリア
+    if (patternTrim === 'EDITOR_CHANGE') {
+      return cmdTrim === '';
     }
     
-    // 全てのwantcodeが順番通りに含まれている場合
-    if (wantcodeIndex === wantcode.length && wantcode.length > 0) {
-      updateStepProgress(true);
-    }
+    // 部分マッチ: パターンがコマンドの開始部分と一致
+    return cmdTrim.startsWith(patternTrim);
+  };
+  
+  // wantcodeの全てが満たされているかチェック
+  const allWantcodeMatched = wantcode.length > 0 && wantcode.every(want => 
+    commandLine.some(cmd => matchesPattern(cmd, want))
+  );
+  
+  if (allWantcodeMatched) {
+    onStepComplete?.();
   }
+  
+  // EDITOR_CHANGEの場合は空白コマンドでもOK
+  if (command.trim() === '' && wantcode.includes('EDITOR_CHANGE')) {
+    return "Editor change detected";
+  }
+  
   const gitMatch = command.match(/^git\s+(\w+)(.*)$/);
   if (!gitMatch) return "This command is not supported this application\nPlease use \"git\" command";
   
@@ -63,7 +75,19 @@ export function terminalcommand(command: string, commandLine: string[], topicNum
       if (opts.has('d')) return `Deleted branch '${args}'`;
       if (opts.has('r')) return "origin/main";
       return args ? `Created branch '${args}'` : "* main";
+    case "stash":
+      if (args === "pop") return "Applied stash and removed from stash list";
+      return "Saved working directory and index state";
+    case "rebase":
+      if (opts.has('i')) return "Interactive rebase started";
+      return "Rebase completed";
+    case "cherry-pick":
+      return args ? `Applied commit ${args}` : "Cherry-pick completed";
+    case "merge":
+      return args ? `Merged branch '${args}'` : "Merge completed";
+    case "pull":
+      return "Updated from remote repository";
     default:
-      return /^(pull|clone|merge|remote|fetch|rebase)$/.test(cmd) ? `${cmd} executed` : `Unknown command: ${cmd}`;
+      return /^(clone|remote|fetch)$/.test(cmd) ? `${cmd} executed` : `Unknown command: ${cmd}`;
   }
 }

@@ -1,28 +1,22 @@
+"use client"
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import UserInfo from './components/UserInfo';
+import { Topic, topics } from '../components/simulation/topix/topix';
 
 // src/app/home/page.tsx
 
-// ダミーデータ
-const themes = [
-  { id: 1, title: '自分のコードをpushしよう！', difficulty: 'Easy', tags: ['branch', 'basic'], pass: '/theme/1', is_completed: true },
-  { id: 2, title: 'コンフリクトを解決しよう！', difficulty: 'Easy', tags: ['conflict'], pass: '/theme/2', is_completed: true },
-  { id: 3, title: 'チーム開発をシミュレーションしてみよう１', difficulty: 'Medium', tags: ['ToDo-Application','simulation', 'advanced'], pass: '/theme/3', is_completed: false },
-  { id: 4, title: 'チーム開発をシミュレーションしてみよう２', difficulty: 'Hard', tags: ['Project LINKS', 'interactive'], pass: '/theme/4', is_completed: false },
-];
-
 // ステータス表示コンポーネント
-const Status = () => {
-  // ダミーデータ
-  const clearCount = 5;
-  const totalClears = 10;
-  const clearPercentage = (clearCount / totalClears) * 100;
+const Status = ({ experience, progress }: { experience: number; progress: string }) => {
+  const clearCount = progress.split('').filter(p => p === '1').length;
+  const totalClears = progress.length;
+  const clearPercentage = totalClears > 0 ? (clearCount / totalClears) * 100 : 0;
 
-  const experience = 1250;
   const nextLevelExp = 2000;
   const expPercentage = (experience / nextLevelExp) * 100;
 
-  const progress = 50; // パーセンテージ
+  const progressPercentage = clearPercentage;
 
   return (
     <div className="mb-8 p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
@@ -43,9 +37,9 @@ const Status = () => {
         </div>
         <div>
           <p className="text-sm text-gray-500 dark:text-gray-400">進捗</p>
-          <p className="text-2xl font-bold">{progress}%</p>
+          <p className="text-2xl font-bold">{Math.round(progressPercentage)}%</p>
           <div className="w-full bg-gray-300 rounded-full h-2.5 mt-2 dark:bg-gray-700">
-            <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+            <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
           </div>
         </div>
       </div>
@@ -54,7 +48,7 @@ const Status = () => {
 };
 
 // お題カードコンポーネント
-const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
+const ThemeCard = ({ theme }: { theme: Topic }) => {
   const difficultyColor: {[key: string]: string} = {
     Easy: 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300',
     Medium: 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
@@ -90,7 +84,7 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
           ))}
         </div>
       </div>
-      <Link href={theme.pass} className={`font-bold py-2 px-4 rounded ml-4 ${
+      <Link href={`/simulation?topicId=${theme.id}`} className={`font-bold py-2 px-4 rounded ml-4 ${
         theme.is_completed
           ? 'bg-gray-500 hover:bg-gray-600 text-white'
           : 'bg-blue-500 hover:bg-blue-700 text-white'
@@ -103,16 +97,28 @@ const ThemeCard = ({ theme }: { theme: typeof themes[0] }) => {
 
 
 export default function HomePage() {
+  const [experience, setExperience] = useState(1250);
+  const [progress, setProgress] = useState('100');
+  const [userThemes, setUserThemes] = useState(topics);
+
+  useEffect(() => {
+    const updatedThemes = topics.map((theme, index) => ({
+      ...theme,
+      is_completed: progress[index] === '1'
+    }));
+    setUserThemes(updatedThemes);
+  }, [progress]);
+
   return (
     <div className="container mx-auto p-4">
 
       <main>
-        <Status />
+        <Status experience={experience} progress={progress} />
 
         <section>
           <h2 className="text-2xl font-bold mb-4">お題カード一覧</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {themes.map(theme => (
+            {userThemes.map(theme => (
               <ThemeCard key={theme.id} theme={theme} />
             ))}
           </div>
