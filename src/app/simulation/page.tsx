@@ -1,13 +1,13 @@
 "use client"
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import { terminalcommand } from "../../features/terminalcommand";
 import { exampleTopic, Topic, Step, getTopicById } from "../components/simulation/topix/topix";
 import { userAgent } from "next/server";
 
-export default function Playground() {
+function PlaygroundContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [topic, setTopic] = useState<Topic>(exampleTopic);
@@ -173,5 +173,13 @@ export default function Playground() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Playground() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PlaygroundContent />
+    </Suspense>
   );
 }
