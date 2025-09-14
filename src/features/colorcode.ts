@@ -1,12 +1,12 @@
 import { linksData } from "../data/linksdata";
 
-export function generateColorCode(): { color: string; ports: string[]; values: number[] } {
-  const colors: number[] = [];
-  const ports: string[] = [];
-  
+function generateSingleColor() {
   const randomRows = linksData.rows
     .sort(() => Math.random() - 0.5)
     .slice(0, 3);
+  
+  const colors: number[] = [];
+  const ports: string[] = [];
   
   randomRows.forEach(row => {
     const twoDigitValues = row
@@ -20,11 +20,26 @@ export function generateColorCode(): { color: string; ports: string[]; values: n
     }
   });
   
-  const r = colors[0] || 0;
-  const g = colors[1] || 0;
-  const b = colors[2] || 0;
+  while (colors.length < 3) {
+    colors.push(Math.floor(Math.random() * 256));
+  }
   
-  const color = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-  
+  const color = `#${colors[0].toString(16).padStart(2, '0')}${colors[1].toString(16).padStart(2, '0')}${colors[2].toString(16).padStart(2, '0')}`;
   return { color, ports, values: colors };
+}
+
+export function generateColorCode(): { color: string; gradient1: string; gradient2: string; ports: string[]; values: number[] } {
+  const first = generateSingleColor();
+  const second = generateSingleColor();
+  
+  const gradient1 = `linear-gradient(135deg, ${first.color}, ${second.color})`;
+  const gradient2 = `linear-gradient(45deg, ${second.color}, ${first.color})`;
+  
+  return {
+    color: first.color,
+    gradient1,
+    gradient2,
+    ports: [...first.ports, ...second.ports],
+    values: [...first.values, ...second.values]
+  };
 }
