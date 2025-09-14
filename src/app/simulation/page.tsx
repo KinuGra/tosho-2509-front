@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Editor from "@monaco-editor/react";
 import { terminalcommand } from "../../features/terminalcommand";
 import { exampleTopic, Topic, Step, getTopicById } from "../components/simulation/topix/topix";
+import { userAgent } from "next/server";
 
 export default function Playground() {
   const router = useRouter();
@@ -17,15 +18,51 @@ export default function Playground() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [editorValue, setEditorValue] = useState("");
   const [initialEditorValue, setInitialEditorValue] = useState("");
+  const [data, setData] = useState("");
 
   const currentStep = topic.steps[currentStepIndex];
   const progress = (currentStepIndex / topic.steps.length) * 100;
 
-  const handleStepComplete = () => {
+  const getUser = async () => {
+    try {
+      const response = await fetch('/api/me', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const BACKEND_URL = 'http://18.207.128.157:8000';
+  const complete = async () => {
+    try {
+      const userData = await getUser();
+      setData(userData);
+      if (userData?.id) {
+        await fetch(`${BACKEND_URL}/users/${userData.id}/exp?amount=100`, {
+          method: "PUT",
+        });
+        const topicId = searchParams.get('topicId');
+        if (topicId) {
+          const topicIndex = parseInt(topicId) - 1;  // 1ベースの ID を 0ベースのインデックスに変換
+          await fetch(`${BACKEND_URL}/users/${userData.id}/progress/${topicIndex}`, { 
+            method: "PUT"
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const handleStepComplete = async () => {
     if (currentStepIndex < topic.steps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
       setCommandHistory([]);
     } else {
+      await complete();
       setIsCompleted(true);
       router.push('/result');
     }
@@ -59,13 +96,15 @@ export default function Playground() {
       sessionStorage.setItem('commandHistory', JSON.stringify(newHistory));
 
       const output = terminalcommand(
-        cmd, 
-        newHistory, 
-        currentStep.wantcode, 
+        cmd,
+        newHistory,
+        currentStep.wantcode,
         () => {
           console.log('Step completed!', { cmd, wantcode: currentStep.wantcode, history: newHistory });
           setTerminalLines((prev) => [...prev, "\n✓ ステップ完了! 次のステップに進みます..."]);
-          setTimeout(handleStepComplete, 1500);
+          setTimeout(() => {
+            handleStepComplete();
+          }, 1500);
         },
         currentStep.responses
       );
@@ -87,10 +126,10 @@ export default function Playground() {
     <div className="flex flex-col min-h-screen">
       {/* 上部ステップバー部分 */}
       <div className="bg-green-200 flex flex-col justify-center items-stretch p-4">
-          <span className="text-md text-black">{topic.title}</span>
+        <span className="text-md text-black">{topic.title}</span>
         <div className="w-full bg-white rounded-full h-4 overflow-hidden">
-          <div 
-            className="bg-green-500 h-4 rounded-full transition-all duration-300" 
+          <div
+            className="bg-green-500 h-4 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
