@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState("test@example.com");
     const [password, setPassword] = useState("password123");
     const [msg, setMsg] = useState("");
@@ -76,5 +76,13 @@ export default function LoginPage() {
                 新規登録は <a className="underline" href="/register">こちら</a>
             </div>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm />
+        </Suspense>
     );
 }
