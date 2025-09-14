@@ -47,7 +47,6 @@ export const topics: Topic[] = [
             title: "コードを編集・追加してaddする",
             description: "必要なコードの編集や追加を行います。",
             wantcode: [
-                "EDITOR_CHANGE",
                 "git add"
             ],
             outcode: "// 新機能の実装\nfunction newFeature() {\n    console.log('新しい機能を追加しました');\n    return true;\n}\n\n// 既存コードの修正\nconst config = {\n    version: '1.1.0',\n    updated: new Date()\n};"
@@ -57,10 +56,9 @@ export const topics: Topic[] = [
             title: "変更をコミットする",
             description: "編集した内容をコミットします。",
             wantcode: [
-                "git add",
                 "git commit -m"
             ],
-            outcode: "git add .\ngit commit -m \"[コミットメッセージ]\"\n// 変更をステージングしてコミットします"
+            outcode: "// 新機能の実装\nfunction newFeature() {\n    console.log('新しい機能を追加しました');\n    return true;\n}\n\n// 既存コードの修正\nconst config = {\n    version: '1.1.0',\n    updated: new Date()\n};\n git add .\ngit commit -m \"[コミットメッセージ]\"\n// 変更をステージングしてコミットします"
         },
         {
             order: 4,
