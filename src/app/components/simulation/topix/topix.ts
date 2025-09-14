@@ -59,7 +59,7 @@ export const topics: Topic[] = [
             wantcode: [
                 "git commit -m"
             ],
-            outcode: "// 新機能の実装\nfunction newFeature() {\n    console.log('新しい機能を追加しました');\n    return true;\n}\n\n// 既存コードの修正\nconst config = {\n    version: '1.1.0',\n    updated: new Date()\n};\n git add .\ngit commit -m \"[コミットメッセージ]\"\n// 変更をステージングしてコミットします"
+            outcode: "// 新機能の実装\nfunction newFeature() {\n    console.log('新しい機能を追加しました');\n    return true;\n}\n\n// 既存コードの修正\nconst config = {\n    version: '1.1.0',\n    updated: new Date()\n}; \n // 変更をステージングしてコミットします\n // git commit -m \"[コミットメッセージ]\"\n"
         },
         {
             order: 4,
