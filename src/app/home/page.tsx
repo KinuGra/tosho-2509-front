@@ -20,7 +20,7 @@ const Status = ({ experience, progress }: { experience: number; progress: string
 
   return (
     <div className="mb-8 p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-2 gap-4 text-center">
         <div>
           <p className="text-sm text-gray-500 dark:text-gray-400">クリア数</p>
           <p className="text-2xl font-bold">{clearCount}</p>
@@ -28,13 +28,13 @@ const Status = ({ experience, progress }: { experience: number; progress: string
             <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${clearPercentage}%` }}></div>
           </div>
         </div>
-        <div>
+        {/* <div>
           <p className="text-sm text-gray-500 dark:text-gray-400">経験値</p>
           <p className="text-2xl font-bold">{experience.toLocaleString()}</p>
           <div className="w-full bg-gray-300 rounded-full h-2.5 mt-2 dark:bg-gray-700">
             <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${expPercentage}%` }}></div>
           </div>
-        </div>
+        </div> */}
         <div>
           <p className="text-sm text-gray-500 dark:text-gray-400">進捗</p>
           <p className="text-2xl font-bold">{Math.round(progressPercentage)}%</p>
@@ -96,6 +96,7 @@ const ThemeCard = ({ theme }: { theme: Topic }) => {
 
 
 export default function HomePage() {
+  const BACKEND_URL = 'http://18.207.128.157:8000';
   const [experience, setExperience] = useState(0);
   const [progress, setProgress] = useState('');
   const [userThemes, setUserThemes] = useState(topics);
@@ -105,20 +106,39 @@ export default function HomePage() {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch('/api/me', {
+        // ユーザー情報を取得
+        const userResponse = await fetch('/api/me', {
           credentials: 'include'
         });
 
-        if (!response.ok) {
+        if (!userResponse.ok) {
           throw new Error('Failed to fetch user status');
         }
 
-        const data = await response.json();
-        setExperience(data.experience || 0);
-        setProgress(data.progress || '');
+        const userData = await userResponse.json();
+        setExperience(userData.experience || 0);
+
+        // 進捗情報を取得
+        try {
+          if (!BACKEND_URL) {
+            throw new Error('Backend URL is not defined');
+          }
+          const progressResponse = await fetch(`${BACKEND_URL}/users/${userData.id}/progress`);
+          if (progressResponse.ok) {
+            const progressData = await progressResponse.json();
+            setProgress(progressData.progress || '0'.repeat(topics.length));
+          } else {
+            // ユーザーが見つからない場合や進捗データが存在しない場合は、すべて未完了状態とする
+            setProgress('0'.repeat(topics.length));
+          }
+        } catch (err) {
+          console.error('Error fetching progress:', err);
+          // エラーの場合も、すべて未完了状態とする
+          setProgress('0'.repeat(topics.length));
+        }
         setIsLoading(false);
       } catch (err) {
-        console.error('Error fetching user status:', err);
+        console.error('Error fetching status:', err);
         setError('Failed to load user status');
         setIsLoading(false);
       }
@@ -128,13 +148,13 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (progress) {
-      const updatedThemes = topics.map((theme, index) => ({
-        ...theme,
-        is_completed: progress[index] === '1'
-      }));
-      setUserThemes(updatedThemes);
-    }
+    // progressが空文字列の場合も含めて処理
+    const progressString = progress || '0'.repeat(topics.length);
+    const updatedThemes = topics.map((theme, index) => ({
+      ...theme,
+      is_completed: progressString[index] === '1'
+    }));
+    setUserThemes(updatedThemes);
   }, [progress]);
 
   return (

@@ -6,7 +6,7 @@ export interface Topic {
     steps: Step[];
     difficulty: string;
     tags: string[];
-    is_completed: boolean;
+    is_completed?: boolean; // オプショナルにして、未設定の場合はfalseとして扱う
 }
 
 // ステップ型
