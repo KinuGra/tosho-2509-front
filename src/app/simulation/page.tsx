@@ -35,7 +35,7 @@ function PlaygroundContent() {
     }
   }
 
-  const BACKEND_URL = 'http://18.207.128.157:8000';
+  const BACKEND_URL = 'http://54.242.42.251:8000';
   const complete = async () => {
     try {
       const userData = await getUser();

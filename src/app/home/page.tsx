@@ -102,7 +102,7 @@ const ThemeCard = ({ theme }: { theme: Topic }) => {
 
 
 export default function HomePage() {
-  const BACKEND_URL = 'http://18.207.128.157:8000';
+  const BACKEND_URL = 'http://54.242.42.251:8000';
   const [experience, setExperience] = useState(0);
   const [progress, setProgress] = useState('');
   const [userThemes, setUserThemes] = useState(topics);
