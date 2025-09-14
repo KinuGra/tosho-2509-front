@@ -57,17 +57,6 @@ export default function ResultPage() {
           </div>
         </div>
 
-        {commandHistory.length > 0 && (
-          <div className="bg-black text-green-400 font-mono p-4 rounded-lg mb-6 max-h-40 overflow-y-auto">
-            {/* <h3 className="text-white mb-2">実行したコマンツ履歴:</h3>
-            {commandHistory.map((cmd, index) => (
-              <div key={index} className="mb-1">
-                <span className="text-gray-400">{index + 1}.</span> {cmd}
-              </div>
-            ))} */}
-          </div>
-        )}
-
         <div className="space-y-3">
           <Link 
             href="/home" 
