@@ -87,10 +87,7 @@ export default function Playground() {
     <div className="flex flex-col min-h-screen">
       {/* 上部ステップバー部分 */}
       <div className="bg-green-200 flex flex-col justify-center items-stretch p-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-black">{topic.title}</span>
-          <span className="font-semibold text-black">{currentStep.title}</span>
-        </div>
+          <span className="text-md text-black">{topic.title}</span>
         <div className="w-full bg-white rounded-full h-4 overflow-hidden">
           <div 
             className="bg-green-500 h-4 rounded-full transition-all duration-300" 
