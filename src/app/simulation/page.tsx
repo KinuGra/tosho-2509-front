@@ -1,94 +1,141 @@
-"use client";
-import { useState } from "react";
-type Step = { id: number; title: string; done: boolean };
+"use client"
 
-const STEPS: Step[] = [
-    { id: 1, title: "見出しの色を変える（エディタ編集）", done: false },
-    { id: 2, title: "変更をステージングに追加（git add）", done: false },
-    { id: 3, title: "コミット（git commit）", done: false },
-    { id: 4, title: "プッシュ（git push）", done: false },
-];
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Editor from "@monaco-editor/react";
+import { terminalcommand } from "../components/simulation/terminlacommand/terminalcommand";
+import { exampleTopic, Topic, Step, getTopicById } from "../components/simulation/topix/topix";
 
-// DBのstep_idは環境により異なるので、seed後の実IDを合わせてね
-const STEP_ID_MAP: Record<number, number> = {
-    1: 1, 2: 2, 3: 3, 4: 4, // 例
-};
+export default function Playground() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [topic, setTopic] = useState<Topic>(exampleTopic);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [terminalLines, setTerminalLines] = useState<string[]>(["Type Git Command!"]);
+  const [input, setInput] = useState("");
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [editorValue, setEditorValue] = useState("");
+  const [initialEditorValue, setInitialEditorValue] = useState("");
 
-export default function SimulationPage() {
-    const [steps, setSteps] = useState<Step[]>(STEPS);
-    const [editor, setEditor] = useState("<h1 class='title'>Hello</h1>");
-    const [term, setTerm] = useState("");
-    const [msg, setMsg] = useState("");
+  const currentStep = topic.steps[currentStepIndex];
+  const progress = (currentStepIndex / topic.steps.length) * 100;
 
-    const submitCommand = async () => {
-        const input = term.trim();
-        setMsg("");
+  const handleStepComplete = () => {
+    if (currentStepIndex < topic.steps.length - 1) {
+      setCurrentStepIndex(prev => prev + 1);
+      setCommandHistory([]);
+    } else {
+      setIsCompleted(true);
+      router.push('/result');
+    }
+  };
 
-        // ステップ判定
-        let nextIdx = steps.findIndex(s => !s.done);
-        if (nextIdx === -1) return;
+  useEffect(() => {
+    const topicId = searchParams.get('topicId');
+    if (topicId) {
+      const selectedTopic = getTopicById(parseInt(topicId));
+      if (selectedTopic) {
+        setTopic(selectedTopic);
+        setCurrentStepIndex(0);
+        setCommandHistory([]);
+      }
+    }
+  }, [searchParams]);
 
-        const next = steps[nextIdx];
+  useEffect(() => {
+    setCommandHistory([]);
+    setEditorValue(currentStep.outcode);
+    setInitialEditorValue(currentStep.outcode);
+  }, [currentStepIndex, currentStep.outcode]);
 
-        // step1: エディタ編集していればOK
-        if (next.id === 1) {
-            if (editor.includes("style=") || editor.includes("text-") || editor.includes("color")) {
-                await complete(next.id);
-            } else {
-                setMsg("見出しの色を変えてから進んでね（styleやclassでOK）");
-            }
-            return;
-        }
 
-        // step2-4: コマンド
-        const need = next.id === 2 ? "git add" : next.id === 3 ? "git commit" : "git push";
-        if (input.startsWith(need)) {
-            await complete(next.id);
-            setTerm("");
-        } else {
-            setMsg(`次は "${need}" を実行してね`);
-        }
-    };
 
-    const complete = async (stepLocalId: number) => {
-        const dbStepId = STEP_ID_MAP[stepLocalId];
-        const res = await fetch("/api/progress/complete", {
-            method: "POST",
-            body: JSON.stringify({ step_id: dbStepId }),
-        });
-        const j = await res.json();
-        if (res.ok) {
-            setSteps(prev => prev.map(s => s.id === stepLocalId ? { ...s, done: true } : s));
-            setMsg(`✅ ${j.message} (+${j.reward}xp) レベル:${j.level}, 経験値:${j.exp}`);
-            // 全部終わったらリザルトへ
-            const allDone = steps.every(s => s.id === stepLocalId ? true : s.done);
-            if (allDone) setTimeout(() => { window.location.href = "/result"; }, 800);
-        } else {
-            setMsg(j.detail || "エラー");
-        }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      const cmd = input.trim();
+      const newHistory = [...commandHistory, cmd];
+      setCommandHistory(newHistory);
+      sessionStorage.setItem('commandHistory', JSON.stringify(newHistory));
 
-    return (
-        <main className="max-w-3xl mx-auto p-6 space-y-4">
-            <h1 className="text-2xl font-bold">シミュレーション</h1>
-            <ol className="list-decimal ml-6 space-y-1">
-                {steps.map(s => (
-                    <li key={s.id} className={s.done ? "line-through text-gray-500" : ""}>{s.title}</li>
-                ))}
-            </ol>
+      const output = terminalcommand(
+        cmd, 
+        newHistory, 
+        currentStep.wantcode, 
+        () => {
+          console.log('Step completed!', { cmd, wantcode: currentStep.wantcode, history: newHistory });
+          setTerminalLines((prev) => [...prev, "\n✓ ステップ完了! 次のステップに進みます..."]);
+          setTimeout(handleStepComplete, 1500);
+        },
+        currentStep.responses
+      );
 
-            <div className="border rounded p-2">
-                <div className="font-semibold mb-2">エディタ</div>
-                <textarea className="w-full h-48 border p-2" value={editor} onChange={e => setEditor(e.target.value)} />
-            </div>
-            <div className="border rounded p-2">
-                <div className="font-semibold mb-2">ターミナル</div>
-                <input className="w-full border p-2" placeholder="git add / git commit -m ... / git push"
-                    value={term} onChange={e => setTerm(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitCommand()} />
-                <button className="mt-2 bg-black text-white px-3 py-1 rounded" onClick={submitCommand}>実行</button>
-            </div>
 
-            <p className="text-sm text-gray-700">{msg}</p>
-        </main>
-    );
+      if (cmd.toLowerCase() === "clear" || output === "CLEAR") {
+        setTerminalLines(["Type Git Command!"]);
+      } else if (cmd === "") {
+        // 空白コマンドの場合は何も表示しない
+      } else {
+        setTerminalLines((prev) => [...prev, `> ${cmd}`, ...output.split("\n")]);
+      }
+
+      setInput("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* 上部ステップバー部分 */}
+      <div className="bg-green-200 flex flex-col justify-center items-stretch p-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm text-black">{topic.title}</span>
+          <span className="font-semibold text-black">{currentStep.title}</span>
+        </div>
+        <div className="w-full bg-white rounded-full h-4 overflow-hidden">
+          <div 
+            className="bg-green-500 h-4 rounded-full transition-all duration-300" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* お題とステップ */}
+      <div className="bg-white p-4 text-center">
+        <h2 className="text-xl font-bold text-black mb-1">{currentStep.title}</h2>
+        <p className="text-black">{currentStep.description}</p>
+      </div>
+
+      {/* Monaco Editor 部分 */}
+      <div className="flex-1 p-4 bg-white">
+        <Editor
+          height="300px"
+          defaultLanguage="typescript"
+          value={editorValue}
+          onChange={(value: string | undefined) => setEditorValue(value || "")}
+          theme="vs-dark"
+        />
+      </div>
+
+      {/* ターミナル部分 */}
+      <div className="bg-black text-green-400 font-mono p-4 h-64 overflow-y-auto">
+        {terminalLines.map((line, idx) => (
+          <div key={idx}>{line}</div>
+        ))}
+
+        {/* 入力欄 */}
+        <div className="flex items-center">
+          <span>&gt;</span>
+          <input
+            type="text"
+            className="bg-black text-green-400 font-mono ml-2 flex-1 outline-none"
+            placeholder="Enter Git command..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
