@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function TwoFAPage() {
+function TwoFAContent() {
     const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [code, setCode] = useState("");
@@ -167,5 +167,13 @@ export default function TwoFAPage() {
                 </p>
             )}
         </main>
+    );
+}
+
+export default function TwoFAPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <TwoFAContent />
+        </Suspense>
     );
 }
