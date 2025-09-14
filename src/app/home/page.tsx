@@ -49,7 +49,7 @@ const Status = ({ experience, progress }: { experience: number; progress: string
 
 // お題カードコンポーネント
 const ThemeCard = ({ theme }: { theme: Topic }) => {
-  const difficultyColor: {[key: string]: string} = {
+  const difficultyColor: { [key: string]: string } = {
     Easy: 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-300',
     Medium: 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
     Hard: 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-300',
@@ -84,11 +84,10 @@ const ThemeCard = ({ theme }: { theme: Topic }) => {
           ))}
         </div>
       </div>
-      <Link href={`/simulation?topicId=${theme.id}`} className={`font-bold py-2 px-4 rounded ml-4 ${
-        theme.is_completed
+      <Link href={`/simulation?topicId=${theme.id}`} className={`font-bold py-2 px-4 rounded ml-4 ${theme.is_completed
           ? 'bg-gray-500 hover:bg-gray-600 text-white'
           : 'bg-blue-500 hover:bg-blue-700 text-white'
-      }`}>
+        }`}>
         {theme.is_completed ? '復習' : '開始'}
       </Link>
     </div>
@@ -97,23 +96,66 @@ const ThemeCard = ({ theme }: { theme: Topic }) => {
 
 
 export default function HomePage() {
-  const [experience, setExperience] = useState(1250);
-  const [progress, setProgress] = useState('100');
+  const [experience, setExperience] = useState(0);
+  const [progress, setProgress] = useState('');
   const [userThemes, setUserThemes] = useState(topics);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const updatedThemes = topics.map((theme, index) => ({
-      ...theme,
-      is_completed: progress[index] === '1'
-    }));
-    setUserThemes(updatedThemes);
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch('/api/me', {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user status');
+        }
+
+        const data = await response.json();
+        setExperience(data.experience || 0);
+        setProgress(data.progress || '');
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching user status:', err);
+        setError('Failed to load user status');
+        setIsLoading(false);
+      }
+    };
+
+    fetchStatus();
+  }, []);
+
+  useEffect(() => {
+    if (progress) {
+      const updatedThemes = topics.map((theme, index) => ({
+        ...theme,
+        is_completed: progress[index] === '1'
+      }));
+      setUserThemes(updatedThemes);
+    }
   }, [progress]);
 
   return (
     <div className="container mx-auto p-4">
+      <main className="max-w-2xl mx-auto p-6 space-y-4">
+        <h1 className="text-2xl font-bold">gitsim</h1>
+        <UserInfo />
+      </main>
 
       <main>
-        <Status experience={experience} progress={progress} />
+        {isLoading ? (
+          <div className="mb-8 p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+            <p className="text-center">ステータスを読み込み中...</p>
+          </div>
+        ) : error ? (
+          <div className="mb-8 p-4 bg-red-100 rounded-lg dark:bg-red-800">
+            <p className="text-center text-red-600 dark:text-red-300">{error}</p>
+          </div>
+        ) : (
+          <Status experience={experience} progress={progress} />
+        )}
 
         <section>
           <h2 className="text-2xl font-bold mb-4">お題カード一覧</h2>
@@ -123,16 +165,6 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-      </main>
-
-      <main className="max-w-2xl mx-auto p-6 space-y-4">
-        <h1 className="text-2xl font-bold">gitsim ホーム</h1>
-        <UserInfo />
-
-        <div className="grid grid-cols-2 gap-4">
-            <a className="border p-4 rounded hover:bg-gray-50" href="/simulation">シミュレーションへ</a>
-            <a className="border p-4 rounded hover:bg-gray-50" href="/ranking">ランキング</a>
-        </div>
       </main>
     </div>
   );

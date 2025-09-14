@@ -3,6 +3,27 @@ import { cookies, headers } from "next/headers";
 
 const BACKEND_URL = process.env.BACKEND_URL!;
 
+// ユーザーのステータス情報を取得
+export async function fetchUserStatus() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/me`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user status');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user status:', error);
+    throw error;
+  }
+}
+
 export function getCookieOptions() {
     const secure = (process.env.COOKIE_SECURE || "false") === "true";
     const sameSite = (process.env.COOKIE_SAMESITE as "lax" | "strict" | "none") || "lax";
