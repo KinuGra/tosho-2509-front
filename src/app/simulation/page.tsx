@@ -70,6 +70,7 @@ export default function Playground() {
         currentStep.responses
       );
 
+
       if (cmd.toLowerCase() === "clear" || output === "CLEAR") {
         setTerminalLines(["Type Git Command!"]);
       } else if (cmd === "") {
